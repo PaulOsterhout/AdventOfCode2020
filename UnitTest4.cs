@@ -22,7 +22,7 @@ namespace AdventOfCode2020
 			List<Passport> passports = GetPassports();
 			Assert.Equal(295, passports.Count);
 			Assert.Equal(new KeyValuePair<string, string>("hcl", "#a97842"), passports.Last().Fields.Last());
-			Assert.Equal(0, passports.Count(x => IsValid(x, GetFieldRequirements(false))));
+			Assert.Equal(224, passports.Count(x => IsValid(x, GetFieldRequirements(false))));
 		}
 
 		private List<Passport> GetPassports()
