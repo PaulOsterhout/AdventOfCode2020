@@ -43,7 +43,8 @@ namespace AdventOfCode2020
 			List<int> emptySeatIds2 = emptySeatIds.Where(x => !emptySeatIds.Any(y => y == x - 1)).ToList();
 			Assert.Equal(2, emptySeatIds2.Count);
 			List<int> emptySeatIds3 = emptySeatIds2.Where(x => !emptySeatIds.Any(y => y == x + 1)).ToList();
-			Assert.Equal(1, emptySeatIds3.Count);
+			int actual = emptySeatIds3.Count;
+			Assert.Equal(1, actual);
 			Assert.Equal(711, emptySeatIds3[0]);
 		}
 

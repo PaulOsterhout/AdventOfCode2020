@@ -27,7 +27,8 @@ namespace AdventOfCode2020
 			Rule noContentsRule = new Rule(rulesTexts[16]);
 			Assert.Equal(13, noContentsRule.ContainerColor.Length);
 			Assert.Equal("vibrant brown", noContentsRule.ContainerColor);
-			Assert.Equal(0, noContentsRule.Contents.Count);
+			int actual = noContentsRule.Contents.Count;
+			Assert.Equal(0, actual);
 			Assert.Equal(0, noContentsRule.Contents.Sum(x => x.Value));
 		}
 
