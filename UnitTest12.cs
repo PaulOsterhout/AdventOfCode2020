@@ -72,7 +72,7 @@ namespace AdventOfCode2020
 				NorthPosition = 1
 			};
 			ferry.MoveMany(new Part2FerryMover(ferryPosition, waypointPosition), StringListRetriever.Retreive("InputList12.txt").Select(x => new NavigationInstruction(x)).ToList());
-			Assert.Equal(108013, ferryPosition.GetManhattanDistance());
+			Assert.Equal(42073, ferryPosition.GetManhattanDistance());
 		}
 
 		private List<NavigationInstruction> GetSampleNavigationInstructions()
