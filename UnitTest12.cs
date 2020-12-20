@@ -228,13 +228,13 @@ namespace AdventOfCode2020
 						ferryPosition.NorthPosition += waypointPosition.NorthPosition * navigationInstruction.Units;
 						break;
 					case "L":
-						RotateWaypointLeft();
+						RotateWaypointLeft(navigationInstruction.Units / 90);
 						break;
 					case "N":
 						waypointPosition.NorthPosition += navigationInstruction.Units;
 						break;
 					case "R":
-						RotateWaypointRight();
+						RotateWaypointRight(navigationInstruction.Units / 90);
 						break;
 					case "S":
 						waypointPosition.NorthPosition -= navigationInstruction.Units;
@@ -245,20 +245,26 @@ namespace AdventOfCode2020
 				}
 			}
 
-			private void RotateWaypointLeft()
+			private void RotateWaypointLeft(int rotations)
 			{
-				int eastPosition = waypointPosition.EastPosition;
-				int northPosition = waypointPosition.NorthPosition;
-				waypointPosition.EastPosition = northPosition * -1;
-				waypointPosition.NorthPosition = eastPosition;
+				for (int rotation = 0; rotation < rotations; rotation++)
+				{
+					int eastPosition = waypointPosition.EastPosition;
+					int northPosition = waypointPosition.NorthPosition;
+					waypointPosition.EastPosition = northPosition * -1;
+					waypointPosition.NorthPosition = eastPosition;
+				}
 			}
 
-			private void RotateWaypointRight()
+			private void RotateWaypointRight(int rotations)
 			{
-				int eastPosition = waypointPosition.EastPosition;
-				int northPosition = waypointPosition.NorthPosition;
-				waypointPosition.EastPosition = northPosition;
-				waypointPosition.NorthPosition = eastPosition * -1;
+				for (int rotation = 0; rotation < rotations; rotation++)
+				{
+					int eastPosition = waypointPosition.EastPosition;
+					int northPosition = waypointPosition.NorthPosition;
+					waypointPosition.EastPosition = northPosition;
+					waypointPosition.NorthPosition = eastPosition * -1;
+				}
 			}
 		}
 	}
