@@ -50,7 +50,7 @@ namespace AdventOfCode2020
 			Assert.Equal(848, cubeState.Count(c => c.active));
 		}
 
-		[Fact]
+		[Fact(Skip = "Runs too long")]
 		public void Part2()
 		{
 			List<Cube> cubeState = CubeCoordinateParser.ParseFrom(StringListRetriever.Retreive("InputList17.txt").ToList());
