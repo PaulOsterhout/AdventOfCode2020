@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -25,46 +24,123 @@ namespace AdventOfCode2020
             internal static List<string> CreateList(List<SatelliteRule> rules)
             {
 				List<string> messages = new List<string>();
-				foreach (SatelliteRule rule in rules)
+                for (int ruleIndex = rules.Select(x => x.Index).Max(); ruleIndex >= rules.Select(x => x.Index).Min(); ruleIndex--)
 				{
-					messages.AddRange(GetRuleMessage(rules, rule));
+                    SatelliteRule rule = rules.SingleOrDefault(x => x.Index == ruleIndex);
+                    if ((rule != null) && (rule.RuleType == "SubRule"))
+                    {
+                        SatelliteSubRule subRule = rule as SatelliteSubRule;
+                        foreach (List<int> ruleSet in subRule.RuleSets)
+                        {
+                            List<string> subMessages = new List<string>();
+                            foreach(int ruleId in ruleSet)
+                            {
+                                SatelliteRule messageRule = rules.SingleOrDefault(x => x.Index == ruleId);
+                                if (messageRule.RuleType == "SubRule")
+                                {
+                                    SatelliteSubRule valuesRule = messageRule as SatelliteSubRule;
+                                    int valuesCount = valuesRule.Messages.Count;
+                                    List<string> newMessages = new List<string>();
+                                    subMessages.ForEach(x => 
+                                    {
+                                        if (valuesCount > 1)
+                                        {
+                                            for (int valueIndex = 1; valueIndex < valuesCount; valueIndex++)
+                                            {
+                                                newMessages.Add(x + valuesRule.Messages[valueIndex]);
+                                            }
+                                        }
+                                        x += valuesRule.Messages[0];
+                                    });
+                                    subMessages.AddRange(newMessages);
+                                }
+                                else
+                                {
+                                    SatelliteCharacterRule characterRule = messageRule as SatelliteCharacterRule;
+                                    subMessages.ForEach(x => x += characterRule.MessageCharacters);
+                                }
+                            }
+                        }
+                    }
 				}
 				return messages;
             }
 
-			private static List<string> GetRuleMessage(List<SatelliteRule> rules, SatelliteRule rule)
+			private static List<string> GetValidMessages(List<SatelliteRule> rules, SatelliteRule rule)
 			{
-				if (rule.Data.StartsWith('"'))
+				if (rule.RuleType == "MessageCharacters")
 				{
-					return new List<string> { rule.Data.Substring(1, rule.Data.Length - 2) };
+					return null;
 				}
 				else
 				{
 					List<string> messages = new List<string>();
-					foreach (string subRules in rule.Data.Split(" | "))
-					{
-						foreach (int ruleId in subRules.Split(' ').Select(x => int.Parse(x)))
-						{
-							SatelliteRule subRule = rules.Single(x => x.Index == ruleId);
-							messages.AddRange(GetRuleMessage(rules, subRule));
-						}
-					}
+                    SatelliteSubRule satelliteSubRule = rule as SatelliteSubRule;
+                    foreach (List<int> subRuleOrder in satelliteSubRule.RuleSets)
+                    {
+                        foreach (int subRuleId in subRuleOrder)
+                        {
+                            SatelliteRule subRule = rules[subRuleId];
+                            if (rule.RuleType == "SubRule")
+                            {
+                                List<string> newMessages = GetValidMessages(rules, subRule);
+                                if (newMessages != null)
+                                {
+                                    messages.AddRange(newMessages);
+                                }
+                            }
+                            else
+                            {
+                                SatelliteCharacterRule satelliteCharacterRule = subRule as SatelliteCharacterRule;
+                                messages.ForEach(x => x += satelliteCharacterRule.MessageCharacters);
+                            }
+                        }
+                    }
 					return messages;
 				}
 			}
         }
 
-		private class SatelliteRule
+		private abstract class SatelliteRule
 		{
-			internal SatelliteRule(string ruleText)
-			{
+            internal SatelliteRule(string ruleText)
+            {
 				int colonIndex = ruleText.IndexOf(':');
 				Index = int.Parse(ruleText.Substring(0, colonIndex));
-				Data = ruleText.Substring(colonIndex + 2);
-			}
-			internal int Index { get; }
-			internal string Data { get; }
+				RuleData = ruleText.Substring(colonIndex + 2);
+            }
+			internal int Index { get; private set; }
+			internal abstract string RuleType { get; }
+            protected string RuleData { get; }
+
+            internal static SatelliteRule CreateRuleFrom(string ruleText)
+            {
+                if (!ruleText.Contains(':')) throw new System.Exception("Not a rule");
+                return ruleText.Contains('"') ? new SatelliteCharacterRule(ruleText) : new SatelliteSubRule(ruleText);
+            }
 		}
+
+		private class SatelliteCharacterRule : SatelliteRule
+		{
+			internal SatelliteCharacterRule(string ruleText) : base(ruleText)
+			{
+                MessageCharacters = RuleData.Substring(1, RuleData.Length - 2);
+			}
+			internal override string RuleType => "MessageCharacters";
+            public string MessageCharacters { get; }
+		}
+
+        private class SatelliteSubRule : SatelliteRule
+        {
+            internal SatelliteSubRule(string ruleText) : base(ruleText)
+            {
+                RuleSets = RuleData.Split(" | ").Select(x => x.Split(' ').Select(x => int.Parse(x)).ToList()).ToList();
+                Messages = new List<string>();
+            }
+			internal override string RuleType => "SubRule";
+            internal List<List<int>> RuleSets { get; }
+            internal List<string> Messages { get; }
+        }
 
         private class SatelliteData
         {
@@ -83,7 +159,7 @@ namespace AdventOfCode2020
                     {
                         if (isRule)
                         {
-                            Rules.Add(new SatelliteRule(line));
+                            Rules.Add(SatelliteRule.CreateRuleFrom(line));
                         }
                         else
                         {
